@@ -205,6 +205,7 @@ const fuse = new Fuse(commands, {
 
 // really I should take input as parameter but it doesn't change properly
 function handleInput() {
+    input = input.trim();
     if (input === "") {
         // special case: don't push to history stack
         term.writeln("");
@@ -231,7 +232,7 @@ function handleInput() {
         term.writeln("\t- CONTACT\tReach out to me.");
         term.writeln("\t- PLAY\t\tPlay a .game file.");
         term.writeln("\t- READ\t\tRead a blog article.");
-        term.writeln("\t- MUTE\t\tToggle sound status. Currently " + (muted ? "OFF": "ON"));
+        term.writeln("\t- MUTE\t\tToggle sounds. Currently " + (muted ? "OFF": "ON"));
     } else if (input === "resume") {
         // const resume = new URL("../files/resume.pdf", window.location.origin);
         // window.open(resume, '_blank');
