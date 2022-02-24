@@ -49,6 +49,8 @@ export default class FileTreeSystem {
                     // failed to locate parent (we are at root)
                     return 1;
                 }
+            } else if (name === ".") {
+                // pass
             } else {
                 // go to a child
                 let children = current.descendants;

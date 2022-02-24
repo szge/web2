@@ -30,6 +30,7 @@ let currentHistoryLocation = -1;
 
 // if the browser attempts to play a sound without webpage interaction first, it throws errors
 let clickedDocument = false;
+let muted = false;
 let backgroundAudio = document.getElementById("whitenoise");
 document.body.addEventListener('click', function(event) {
     clickedDocument = true;
@@ -37,7 +38,17 @@ document.body.addEventListener('click', function(event) {
         backgroundAudio.volume = 0.7;
         backgroundAudio.play();
     }
-}, true); 
+}, true);
+
+// mute/unmute sound
+function toggleSound() {
+    muted = !muted;
+    if (!muted) {
+        backgroundAudio.play();
+    } else {
+        backgroundAudio.pause();
+    }
+}
 
 export default class App extends React.Component {
     constructor(props) {
@@ -120,16 +131,22 @@ function fitTerminalToWindow() {
 }
 
 function playTypingSound() {
-    // we have two audio sources in case the first one is busy.
+    // we have three audio sources in case some are busy.
     let audio1 = document.getElementById("typesound1");
     let audio2 = document.getElementById("typesound2");
     let audio3 = document.getElementById("typesound3");
-    if (audio1.paused) {
-        if (clickedDocument) audio1.play();
-    } else if (audio2.paused) {
-        if (clickedDocument) audio2.play();
+    if (muted) {
+        audio1.pause();
+        audio2.pause();
+        audio3.pause();
     } else {
-        if (clickedDocument) audio3.play();
+        if (audio1.paused) {
+            if (clickedDocument) audio1.play();
+        } else if (audio2.paused) {
+            if (clickedDocument) audio2.play();
+        } else {
+            if (clickedDocument) audio3.play();
+        }
     }
 }
 
@@ -171,6 +188,8 @@ function handleKeyPress(key) {
 
     } else if (char === "ArrowRight") {
 
+    } else if (char === "Tab") {
+        // TODO: autocompletion
     } else if (char.length === 1) {
         input += key.key;
         term.write(char);
@@ -178,7 +197,7 @@ function handleKeyPress(key) {
 }
 
 // used for fuzzy search
-const commands = ["help", "resume", "dir", "cls", "reset", "cd", "contact", "play", "read"];
+const commands = ["help", "resume", "dir", "cls", "reset", "cd", "contact", "play", "read", "mute"];
 const fuse = new Fuse(commands, {
     includeScore: true,
     threshold: 1.0 // matches anything
@@ -212,6 +231,7 @@ function handleInput() {
         term.writeln("\t- CONTACT\tReach out to me.");
         term.writeln("\t- PLAY\t\tPlay a .game file.");
         term.writeln("\t- READ\t\tRead a blog article.");
+        term.writeln("\t- MUTE\t\tToggle sound status. Currently " + (muted ? "OFF": "ON"));
     } else if (input === "resume") {
         // const resume = new URL("../files/resume.pdf", window.location.origin);
         // window.open(resume, '_blank');
@@ -226,8 +246,9 @@ function handleInput() {
         term.writeln("");
         term.writeln("\u001b[4m\x1B[1;36mWork Experience\x1B[0m");
         term.writeln("\x1B[1;3;36mDigital Leisure Inc.\x1B[0m - Game Developer [May 2021 - August 2021]");
-        term.writeln("\t- Created three 3D multiplayer minigames for an upcoming title");
+        term.writeln("\t- Created three 3D multiplayer minigames in Unity for an upcoming title");
         term.writeln("\t- Chess, checkers, prototyped an action-oriented minigame with projectile physics");
+        term.writeln("\t- Refactored existing game systems and built a Maya plugin to assist artists");
         term.writeln("\x1B[1;3;36mSummer Institute\x1B[0m - Volunteer [July 2016 - August 2017]");
         term.writeln("\t- 180+ hours volunteering hours over two summers, supervising kids and running activities");
         term.writeln("");
@@ -334,10 +355,13 @@ function handleInput() {
                 if (child.type === "blog") {
                     term.writeln("To be implemented!!");
                 } else {
-                    term.writeln(blogName + " is not a game.");
+                    term.writeln(blogName + " is not a blog post.");
                 }
             }
         }
+    } else if (input === "mute") {
+        toggleSound();
+        term.writeln("Turned sounds " + (muted ? "OFF": "ON"));
     } else {
         const result = fuse.search(input);
         term.writeln("Sorry, command not recognized. Did you mean " + result[0].item.toUpperCase() + "?");
