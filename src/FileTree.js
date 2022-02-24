@@ -1,7 +1,9 @@
 class FileTreeNode {
-    constructor(directoryName) {
+    // types: "folder", "game", "file"
+    constructor(directoryName, type = "folder") {
         this.name = directoryName;
         this.descendants = [];
+        this.type = type;
         this.parent = null;
     }
 
@@ -19,9 +21,9 @@ class FileTreeNode {
         }
     }
 
-    addChildName(newChildName) {
-        let child = new FileTreeNode(newChildName);
-        this.addChild(child);
+    addChildName(newChildName, type = "folder") {
+        let child = new FileTreeNode(newChildName, type);
+        this.addChild(child, type);
     }
 
     // we don't really need a remove child, unless we want the user to be able to change the file system.
@@ -33,9 +35,42 @@ export default class FileTreeSystem {
         this.currentNode = this.root;
     }
 
-    // given a child directory name navigate to it
+    // given a child directory name navigate to it e.g. "../blog"
+    // returns: 0 - successful, 1 - failed to navigate, 2 - not a folder/directory
     navigateTo(string) {
-
+        let current = this.currentNode;
+        string = string.split("/");
+        for (let name of string) {
+            if (name === "..") {
+                // go up a directory
+                if (current.parent !== null) {
+                    current = current.parent;
+                } else {
+                    // failed to locate parent (we are at root)
+                    return 1;
+                }
+            } else {
+                // go to a child
+                let children = current.descendants;
+                let foundChild = false;
+                for (let child of children) {
+                    if (child.name === name) {
+                        if (child.type === "folder") {
+                            current = child;
+                            foundChild = true;
+                            break;
+                        } else {
+                            return 2;
+                        }
+                    }
+                }
+                if (!foundChild) {
+                    return 1;
+                }
+            }
+        }
+        this.currentNode = current;
+        return 0;
     }
 
     // returns the children of the current node
@@ -43,8 +78,27 @@ export default class FileTreeSystem {
         return this.currentNode.descendants;
     }
 
-    addChild(childName) {
-        this.currentNode.addChildName(childName);
+    getChildByName(childName) {
+        for (let child of this.currentNode.descendants) {
+            if (child.name === childName) return child;
+        }
+        return null;
+    }
+
+    getChildrenOfType(typeName) {
+        let list = [];
+        for (let child of this.currentNode.descendants) {
+            if (child.type === typeName) list.push(child);
+        }
+        return list;
+    }
+
+    getChildNames() {
+        return this.currentNode.descendants.map(child => child.name);
+    }
+
+    addChild(childName, type = "folder") {
+        this.currentNode.addChildName(childName, type);
     }
 
     getCurrentDirectoryName() {
