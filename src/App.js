@@ -5,7 +5,6 @@ import Fuse from 'fuse.js'
 import "../node_modules/xterm/css/xterm.css";
 import "./App.css";
 import FileTreeSystem from "./FileTree"
-import { selectOptions } from "@testing-library/user-event/dist/select-options";
 
 // construct file directory system
 let fileSystem = new FileTreeSystem("root");
@@ -77,7 +76,7 @@ export default class App extends React.Component {
 
         term.writeln("My name is Jonathan Chiang, also known as \x1B[1;3;36mszge\x1B[0m.");
         term.writeln("\x1B[1;3;36mszgeOS v1.0.0\x1B[0m with custom tree file system and fuzzy search.");
-        term.writeln("Welcome to my personal website. This is best experienced on a 1080p monitor.");
+        term.writeln("Welcome to my personal website. To see my portfolio website, visit \x1B[1;36mszge.github.io\x1B[0m");
         term.writeln("Try entering \"help\" in the command line.");
         
         term.setOption("scrollback", 0);
