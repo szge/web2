@@ -205,6 +205,7 @@ const fuse = new Fuse(commands, {
 
 // really I should take input as parameter but it doesn't change properly
 function handleInput() {
+    console.log(input);
     input = input.trim();
     if (input === "") {
         // special case: don't push to history stack
@@ -221,6 +222,7 @@ function handleInput() {
     term.write("\r\n");
     input = input.toLowerCase();
     
+    // TODO: maybe add help <command>
     if (input === "help") {
         term.writeln("Available commands:");
         term.writeln("\t- HELP\t\tShows this text.");
@@ -365,7 +367,11 @@ function handleInput() {
         term.writeln("Turned sounds " + (muted ? "OFF": "ON"));
     } else {
         const result = fuse.search(input);
-        term.writeln("Sorry, command not recognized. Did you mean " + result[0].item.toUpperCase() + "?");
+        if (result.length === 0 || result[0].score > 0.5) {
+            term.writeln("Sorry, command not recognized.");
+        } else {
+            term.writeln("Sorry, command not recognized. Did you mean " + result[0].item.toUpperCase() + "?");
+        }
         term.writeln("Type \"help\" for available commands.");
     }
     term.write(shellprompt);
